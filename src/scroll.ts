@@ -1,4 +1,4 @@
-/**
+/*
 * Detect Element Resize
 *
 * modefied from https://github.com/sdecima/javascript-detect-element-resize
@@ -7,7 +7,7 @@
 * version: 0.5.3
 **/
 
-type IResizeCallBack = () => void;
+import { IResizeCallBack } from './type';
 
 type IResizeElement = HTMLElement & {
   __resizeTriggers__: HTMLElement | null;
@@ -45,8 +45,8 @@ const resetTriggers = (element: IResizeElement) => {
   expand.scrollTop = expand.scrollHeight;
 };
 
-const checkTriggers = (element: IResizeElement) => element.offsetWidth != element.__resizeLast__.width ||
-  element.offsetHeight != element.__resizeLast__.height;
+const checkTriggers = (element: IResizeElement) => element.offsetWidth !== element.__resizeLast__.width ||
+  element.offsetHeight !== element.__resizeLast__.height;
 
 function scrollListener(this: IResizeElement, e: Event) {
   const element = this;
@@ -68,9 +68,9 @@ const getAnimateParams = () => {
   let animation = false;
   // let animationstring = 'animation';
   let keyframeprefix = '';
-  let animationstartevent = 'animationstart';
-  let domPrefixes = 'Webkit Moz O ms'.split(' ');
-  let startEvents = 'webkitAnimationStart animationstart oAnimationStart MSAnimationStart'.split(' ');
+  let animstartevent = 'animationstart';
+  const domPrefixes = 'Webkit Moz O ms'.split(' ');
+  const startEvents = 'webkitAnimationStart animationstart oAnimationStart MSAnimationStart'.split(' ');
   let pfx = '';
 
   const elm = document.createElement('fakeelement');
@@ -79,30 +79,36 @@ const getAnimateParams = () => {
   }
 
   if (animation === false) {
-    for (var i = 0; i < domPrefixes.length; i++) {
+    for (let i = 0; i < domPrefixes.length; i++) {
       if (elm.style[domPrefixes[i] + 'AnimationName'] !== undefined) {
         pfx = domPrefixes[i];
         // animationstring = pfx + 'Animation';
         keyframeprefix = '-' + pfx.toLowerCase() + '-';
-        animationstartevent = startEvents[i];
+        animstartevent = startEvents[i];
         animation = true;
         break;
       }
     }
   }
 
-  const animationName = 'resizeanim';
-  const animationKeyframes = '@' + keyframeprefix + 'keyframes ' + animationName + ' { from { opacity: 0; } to { opacity: 0; } } ';
-  const animationStyle = keyframeprefix + 'animation: 1ms ' + animationName + '; ';
+  const animName = 'resizeanim';
+  // tslint:disable-next-line:max-line-length
+  const animKeyframes = '@' + keyframeprefix + 'keyframes ' + animationName + ' { from { opacity: 0; } to { opacity: 0; } } ';
+  const animStyle = keyframeprefix + 'animation: 1ms ' + animationName + '; ';
 
-  return { animationName, animationKeyframes, animationStyle, animationstartevent };
+  return {
+    animationName: animName,
+    animationKeyframes: animKeyframes,
+    animationStyle: animStyle,
+    animationstartevent: animstartevent,
+  };
 };
 
 const { animationKeyframes, animationStyle, animationstartevent, animationName } = getAnimateParams();
 
 const createStyles = () => {
   if (!stylesCreated) {
-    //opacity:0 works around a chrome bug https://code.google.com/p/chromium/issues/detail?id=286360
+    // opacity:0 works around a chrome bug https://code.google.com/p/chromium/issues/detail?id=286360
     const css = `
             ${animationKeyframes}
             .resize-triggers {
@@ -148,12 +154,13 @@ const createStyles = () => {
   }
 };
 
-export const addResizeListener = (element: IResizeElement, fn: IResizeCallBack) => {
+export const addResizeListener = (el: HTMLElement, fn: IResizeCallBack) => {
+  const element = el as IResizeElement;
   if (attachEvent) {
     (element as any).attachEvent('onresize', fn);
   } else {
     if (!element.__resizeTriggers__) {
-      if (getComputedStyle(element).position == 'static') {
+      if (getComputedStyle(element).position === 'static') {
         element.style.position = 'relative';
       }
       createStyles();
@@ -174,7 +181,7 @@ export const addResizeListener = (element: IResizeElement, fn: IResizeCallBack) 
       /* Listen for a css animation to detect element display/re-attach */
       if (animationstartevent) {
         element.__resizeTriggers__.addEventListener(animationstartevent, (e: any) => {
-          if (e.animationName == animationName) {
+          if (e.animationName === animationName) {
             resetTriggers(element);
           }
         });
@@ -184,7 +191,8 @@ export const addResizeListener = (element: IResizeElement, fn: IResizeCallBack) 
   }
 };
 
-export const removeResizeListener = (element: IResizeElement, fn: IResizeCallBack) => {
+export const removeResizeListener = (el: HTMLElement, fn: IResizeCallBack) => {
+  const element = el as IResizeElement;
   if (attachEvent) {
     (element as any).detachEvent('onresize', fn);
   } else {
