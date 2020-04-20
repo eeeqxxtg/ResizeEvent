@@ -1,18 +1,20 @@
+import { IResizeCallBack } from './type';
+
 const ResizeObserver = (window as any).ResizeObserver;
 
 const resizelistenerWm = new WeakMap();
 const resizeObserverWm = new WeakMap();
 
-const resizeHandler = function (entries) {
-  for (let entry of entries) {
+const resizeHandler = (entries: any[]) => {
+  for (const entry of entries) {
     const listeners = resizelistenerWm.get(entry.target) || [];
     if (listeners.length) {
-      listeners.forEach(fn => fn());
+      listeners.forEach((fn: IResizeCallBack) => fn());
     }
   }
 };
 
-export const addResizeListener = function (element: HTMLElement, fn: () => void) {
+export const addResizeListener = (element: HTMLElement, fn: IResizeCallBack) => {
   if (!resizelistenerWm.has(element)) {
     resizelistenerWm.set(element, []);
     const ro = new ResizeObserver(resizeHandler);
@@ -22,7 +24,7 @@ export const addResizeListener = function (element: HTMLElement, fn: () => void)
   resizelistenerWm.get(element).push(fn);
 };
 
-export const removeResizeListener = function (element: HTMLElement, fn: () => void) {
+export const removeResizeListener = (element: HTMLElement, fn: IResizeCallBack) => {
   if (!element || !resizelistenerWm.has(element)) {
     return;
   }
