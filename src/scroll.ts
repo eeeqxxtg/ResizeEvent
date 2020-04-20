@@ -7,7 +7,7 @@
 * version: 0.5.3
 **/
 
-import { IResizeCallBack } from './type';
+import { IResizeCallBack } from './utils';
 
 type IResizeElement = HTMLElement & {
   __resizeTriggers__: HTMLElement | null;
